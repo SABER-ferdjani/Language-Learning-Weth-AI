@@ -12,11 +12,6 @@ dotenv.config();
 
 const app = new Hono();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/language-learning')
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
-
 // Middleware
 app.use('*', logger());
 app.use('*', cors({
@@ -39,10 +34,24 @@ app.onError((err, c) => {
   return c.json({ message: err.message || 'Internal Server Error' }, 500);
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 console.log(`Server is running on port ${port}`);
 
 serve({
   fetch: app.fetch,
   port
 });
+
+// Connect to MongoDB
+
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/language-learning')
+  .then(() => {
+    console.log('MongoDB Connected');
+    serve({ fetch: app.fetch, port }, (info) => {
+      console.log(`Server is running on port ${info.port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // لا تشغّل السيرفر إذا فشل الاتصال
+  });
