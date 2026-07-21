@@ -34,13 +34,8 @@ app.onError((err, c) => {
   return c.json({ message: err.message || 'Internal Server Error' }, 500);
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 console.log(`Server is running on port ${port}`);
-
-serve({
-  fetch: app.fetch,
-  port
-});
 
 // Connect to MongoDB
 
