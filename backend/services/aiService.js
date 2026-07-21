@@ -62,13 +62,27 @@ Return a JSON object with the following structure exactly (no markdown formattin
   }
 };
 
-export const transcribeAudio = async (audioStream) => {
+export const transcribeAudio = async (audioFile) => {
   try {
-    const transcription = await groq.audio.transcriptions.create({
-      file: audioStream,
-      model: 'whisper-large-v3',
-    });
-    return transcription.text;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Convert the uploaded audio file to base64
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const base64Audio = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = audioFile.type || 'audio/webm';
+
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: base64Audio,
+          mimeType: mimeType
+        }
+      },
+      { text: 'Transcribe this audio exactly as spoken. Return ONLY the transcription text, nothing else (no labels, no explanations).' }
+    ]);
+
+    const transcription = result.response.text().trim();
+    return transcription;
   } catch (error) {
     console.error('Error in transcribeAudio:', error);
     throw new Error('Failed to transcribe audio');

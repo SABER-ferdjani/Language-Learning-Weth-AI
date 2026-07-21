@@ -108,8 +108,7 @@ chatRoutes.post('/:conversationId?/voice', async (c) => {
   }
 
   try {
-    // Transcribe audio using Whisper
-    // Ensure that audioFile satisfies the interface for OpenAI file upload
+    // Transcribe the uploaded audio with Gemini.
     const userText = await transcribeAudio(audioFile);
     conversation.messages.push({ role: 'user', content: userText });
 
